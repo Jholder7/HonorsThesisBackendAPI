@@ -2,6 +2,7 @@ package edu.murraystate.thesisproject.backendapi;
 
 import edu.murraystate.thesisproject.backendapi.core.EvaluateDifference;
 import edu.murraystate.thesisproject.backendapi.core.Formatter;
+import edu.murraystate.thesisproject.backendapi.core.formatoptions.BraceStyleOptions;
 import edu.murraystate.thesisproject.backendapi.core.utils.types.SegmentMeta;
 import edu.murraystate.thesisproject.backendapi.records.BulkEvalData;
 import edu.murraystate.thesisproject.backendapi.records.Status;
@@ -47,18 +48,33 @@ public class BaseServiceController {
             throw new RuntimeException(e);
         }
 
-        File tempFile = new File("src/main/resources/Temp/"+fileID);
-        Formatter formatter = new Formatter(tempFile);
-        tempFile.delete();
+        //File tempFile = new File("src/main/resources/Temp/"+fileID);
+        Formatter formatter = new Formatter(new File("src/main/resources/Temp/"+fileID));
+        //formatter.getOptionsHandler().setBraceStyleOption(BraceStyleOptions.ALLMAN);
 
-        EvaluateDifference eval = new EvaluateDifference(inputFile.fileContents(), formatter.getFormated());
+        EvaluateDifference eval = new EvaluateDifference(formatter.getOrigional(), formatter.getFormated());
         final SegmentMeta[] segs = eval.getDifferences();
+        System.out.println("Found " + segs.length + " Formatting Errors:\n");
 
         //TODO: This should be the total original char count divided by the total original issued char count
         // This is a temp number which needs fixed
         final long etcr = Math.round(((segs.length * 1.0) / inputFile.fileContents().length()) * 100);
+        for(SegmentMeta seg : segs){
+            int[] data = seg.getSegmentData();
+            System.out.println("Mismatch: " + (formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
+            System.out.println("        : " + (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
+            System.out.println(seg+"\n");
+        }
 
-        return new BulkEvalData(requestID, inputFile.fileTitle(), segs, segs.length, etcr, -1);
+        StringBuffer str = new StringBuffer(inputFile.fileContents());
+        str.append(" ");
+        for (SegmentMeta segment : segs){
+            int[] seg = segment.getSegmentData();
+            str.setCharAt(seg[0], '#');
+            str.setCharAt(seg[1], '#');
+        }
+
+        return new BulkEvalData(requestID, inputFile.fileTitle(), str.toString(), segs, segs.length, etcr, -1);
     }
 
     private String getFileTypeFromName(final String fileName){
