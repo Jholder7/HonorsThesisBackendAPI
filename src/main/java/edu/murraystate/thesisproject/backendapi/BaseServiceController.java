@@ -2,7 +2,6 @@ package edu.murraystate.thesisproject.backendapi;
 
 import edu.murraystate.thesisproject.backendapi.core.EvaluateDifference;
 import edu.murraystate.thesisproject.backendapi.core.Formatter;
-import edu.murraystate.thesisproject.backendapi.core.formatoptions.BraceStyleOptions;
 import edu.murraystate.thesisproject.backendapi.core.utils.types.SegmentMeta;
 import edu.murraystate.thesisproject.backendapi.records.BulkEvalData;
 import edu.murraystate.thesisproject.backendapi.records.Status;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
