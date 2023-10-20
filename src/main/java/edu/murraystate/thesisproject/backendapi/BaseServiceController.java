@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -38,7 +39,6 @@ public class BaseServiceController {
     @CrossOrigin(origins = "http://localhost:3000")
     @RequestMapping(value = "/api-v1/baseService/evalFile", method = RequestMethod.POST)
     public BulkEvalData evalFile(@RequestBody metaFile inputFile) {
-        System.out.println(inputFile.fileContents());
         final long requestID = fileCounter.incrementAndGet();
         final String fileID = "sourceFile"+requestID+"."+getFileTypeFromName(inputFile.fileTitle());
 
@@ -51,6 +51,8 @@ public class BaseServiceController {
         //File tempFile = new File("src/main/resources/Temp/"+fileID);
         Formatter formatter = new Formatter(new File("src/main/resources/Temp/"+fileID));
         //formatter.getOptionsHandler().setBraceStyleOption(BraceStyleOptions.ALLMAN);
+
+        formatter.getOptionsHandler().applyOptionList(inputFile.settings());
 
         EvaluateDifference eval = new EvaluateDifference(formatter.getOrigional(), formatter.getFormated());
         final SegmentMeta[] segs = eval.getDifferences();
@@ -81,9 +83,4 @@ public class BaseServiceController {
         final String[] fileTitleParts = fileName.split("\\.");
         return fileTitleParts[fileTitleParts.length-1];
     }
-
-//    @GetMapping("/greeting")
-//    public BackendService greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
-//        return new BackendService(counter.incrementAndGet(), String.format(template, name));
-//    }
 }
