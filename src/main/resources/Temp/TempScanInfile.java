@@ -4,4 +4,10 @@ public class test
 	{
 		System.out.println("Hello World");
 	}
+	//This is a simple comment
+	/*
+	This is
+	a multi
+	line comment
+	*/
 }

@@ -81,6 +81,7 @@ public class FormatOptionHandler {
     }
 
     public void applyOptionList(String[] settings){
+        if (settings == null) {return;}
         for(String str : settings) {
             System.out.println("evaling settings " + str);
             switch(str.charAt(0)){

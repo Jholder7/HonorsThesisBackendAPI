@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class BaseServiceController {
@@ -66,6 +68,12 @@ public class BaseServiceController {
             System.out.println(seg+"\n");
         }
 
+        Pattern comPat = Pattern.compile("//.*|(?s)/\\*.*?\\*/"); //<- Somehow works on parsed java but not native java?
+        Matcher matcher = comPat.matcher(formatter.getOrigional());
+        int totalCommentCount = 0;
+        while(matcher.find())
+            totalCommentCount++;
+
         StringBuffer str = new StringBuffer(inputFile.fileContents());
         str.append(" ");
         for (SegmentMeta segment : segs){
@@ -74,7 +82,7 @@ public class BaseServiceController {
             str.setCharAt(seg[1], '#');
         }
 
-        return new BulkEvalData(requestID, inputFile.fileTitle(), str.toString(), segs, segs.length, etcr, -1);
+        return new BulkEvalData(requestID, inputFile.fileTitle(), str.toString(), segs, segs.length, etcr, totalCommentCount);
     }
 
     private String getFileTypeFromName(final String fileName){
