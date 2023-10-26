@@ -1,13 +1,16 @@
-public class test
-{
-	public static void main (String args[])
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace test {
+	class Program
 	{
-		System.out.println("Hello World");
+		static void Main(string[] args) {
+			string message = "Hello World!!";
+
+			Console.WriteLine(message);
+		}
 	}
-	//This is a simple comment
-	/*
-	This is
-	a multi
-	line comment
-	*/
 }

@@ -17,12 +17,15 @@ public class Formatter {
         this.formatOptions = new FormatOptionHandler();
         try {
             StringBuilder str1 = new StringBuilder();
-            BufferedReader buffer = new BufferedReader(new FileReader(file));
+            FileReader fileReader = new FileReader(file);
+            BufferedReader buffer = new BufferedReader(fileReader);
             String line;
             while ((line = buffer.readLine()) != null) {
                 str1.append(line).append("\n");
             }
             originalStr = str1.toString();
+            buffer.close();
+            fileReader.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

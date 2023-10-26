@@ -2,6 +2,7 @@ package edu.murraystate.thesisproject.backendapi;
 
 import edu.murraystate.thesisproject.backendapi.core.EvaluateDifference;
 import edu.murraystate.thesisproject.backendapi.core.Formatter;
+import edu.murraystate.thesisproject.backendapi.core.utils.types.SegmentLiteral;
 import edu.murraystate.thesisproject.backendapi.core.utils.types.SegmentMeta;
 import edu.murraystate.thesisproject.backendapi.records.BulkEvalData;
 import edu.murraystate.thesisproject.backendapi.records.Status;
@@ -48,8 +49,8 @@ public class BaseServiceController {
             throw new RuntimeException(e);
         }
 
-        //File tempFile = new File("src/main/resources/Temp/"+fileID);
-        Formatter formatter = new Formatter(new File("src/main/resources/Temp/"+fileID));
+        File tempFile = new File("src/main/resources/Temp/"+fileID);
+        Formatter formatter = new Formatter(tempFile);
         //formatter.getOptionsHandler().setBraceStyleOption(BraceStyleOptions.ALLMAN);
 
         formatter.getOptionsHandler().applyOptionList(inputFile.settings());
@@ -61,11 +62,18 @@ public class BaseServiceController {
         //TODO: This should be the total original char count divided by the total original issued char count
         // This is a temp number which needs fixed
         final long etcr = Math.round(((segs.length * 1.0) / inputFile.fileContents().length()) * 100);
+        SegmentLiteral[] literalSegs = new SegmentLiteral[segs.length];
+        int literalSegsCounter = 0;
         for(SegmentMeta seg : segs){
             int[] data = seg.getSegmentData();
-            System.out.println("Mismatch: " + (formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
-            System.out.println("        : " + (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
-            System.out.println(seg+"\n");
+            literalSegs[literalSegsCounter] = new SegmentLiteral((formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", ""),
+                    (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", ""),
+                    -1);
+            literalSegsCounter++;
+//            //Print out the mismatches for debugging reasons
+//            System.out.println("Mismatch: " + (formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
+//            System.out.println("        : " + (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
+//            System.out.println(seg+"\n");
         }
 
         Pattern comPat = Pattern.compile("//.*|(?s)/\\*.*?\\*/"); //<- Somehow works on parsed java but not native java?
@@ -74,15 +82,9 @@ public class BaseServiceController {
         while(matcher.find())
             totalCommentCount++;
 
-        StringBuffer str = new StringBuffer(inputFile.fileContents());
-        str.append(" ");
-        for (SegmentMeta segment : segs){
-            int[] seg = segment.getSegmentData();
-            str.setCharAt(seg[0], '#');
-            str.setCharAt(seg[1], '#');
-        }
 
-        return new BulkEvalData(requestID, inputFile.fileTitle(), str.toString(), segs, segs.length, etcr, totalCommentCount);
+        tempFile.delete();
+        return new BulkEvalData(requestID, inputFile.fileTitle(), segs.length, etcr, totalCommentCount, segs, literalSegs);
     }
 
     private String getFileTypeFromName(final String fileName){
