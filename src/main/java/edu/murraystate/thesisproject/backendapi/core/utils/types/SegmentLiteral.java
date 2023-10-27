@@ -6,17 +6,17 @@ import java.util.Arrays;
 public class SegmentLiteral {
     final private String preStr;
     final private String postStr;
-    final private float deductionAmount;
+    final private String deductionType;
 
     //TODO: Document
-    public SegmentLiteral(String preString, String postString, float deductionAmount){
+    public SegmentLiteral(String preString, String postString, String deductionAmount){
         this.preStr = preString;
         this.postStr = postString;
-        this.deductionAmount = deductionAmount;
+        this.deductionType = deductionAmount;
     }
 
     public String[] getSegmentLiteralData() {
-        return new String[]{preStr, postStr, Float.valueOf(deductionAmount).toString()};
+        return new String[]{preStr, postStr, deductionType};
     }
 
     //TODO: Document

@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace test {
-	class Program
+public class test
+{
+	public static void main (String args[])
 	{
-		static void Main(string[] args) {
-			string message = "Hello World!!";
-
-			Console.WriteLine(message);
-		}
+		System.out.println("Hello World");
 	}
 }

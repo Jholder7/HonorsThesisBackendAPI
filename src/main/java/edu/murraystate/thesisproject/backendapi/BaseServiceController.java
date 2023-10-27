@@ -59,29 +59,39 @@ public class BaseServiceController {
         final SegmentMeta[] segs = eval.getDifferences();
         System.out.println("Found " + segs.length + " Formatting Errors:\n");
 
-        //TODO: This should be the total original char count divided by the total original issued char count
-        // This is a temp number which needs fixed
-        final long etcr = Math.round(((segs.length * 1.0) / inputFile.fileContents().length()) * 100);
         SegmentLiteral[] literalSegs = new SegmentLiteral[segs.length];
+        int errorCharCount = 0;
         int literalSegsCounter = 0;
         for(SegmentMeta seg : segs){
             int[] data = seg.getSegmentData();
-            literalSegs[literalSegsCounter] = new SegmentLiteral((formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", ""),
-                    (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", ""),
-                    -1);
+            String preStr = (formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", "");
+            String postStr = (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "/n").replace("\t", "/t").replace(" ", "_").replace("|", "");
+            StringBuilder errorType = new StringBuilder();
+            if (preStr.contains("{") || preStr.contains("}")) {
+                errorType.append("B");
+            } if (preStr.contains("/n")) {
+                errorType.append("N");
+            } if (preStr.contains("/t")) {
+                errorType.append("T");
+            } if (preStr.contains("_")) {
+                errorType.append("S");
+            }
+            System.out.println(errorType);
+            literalSegs[literalSegsCounter] = new SegmentLiteral(preStr, postStr, errorType.toString());
+            errorCharCount+=(data[1] - data[0]+1);
             literalSegsCounter++;
 //            //Print out the mismatches for debugging reasons
 //            System.out.println("Mismatch: " + (formatter.getOrigional()+"|").substring(data[0], data[1]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
 //            System.out.println("        : " + (formatter.getFormated()+"|").substring(data[2], data[3]+1).replace("\n", "&n").replace("\t", "&t").replace(" ", "_").replace("|", ""));
 //            System.out.println(seg+"\n");
         }
+        final long etcr = Math.round(((errorCharCount * 1.0) / formatter.getOrigional().length()) * 100);
 
         Pattern comPat = Pattern.compile("//.*|(?s)/\\*.*?\\*/"); //<- Somehow works on parsed java but not native java?
         Matcher matcher = comPat.matcher(formatter.getOrigional());
         int totalCommentCount = 0;
         while(matcher.find())
             totalCommentCount++;
-
 
         tempFile.delete();
         return new BulkEvalData(requestID, inputFile.fileTitle(), segs.length, etcr, totalCommentCount, segs, literalSegs);
