@@ -113,17 +113,22 @@ public class BaseServiceController {
     private String[] EvalDynamicSettings(String str) {
         ArrayList<String> options = new ArrayList<>();
 
-        //Evaluate first indent type and add setting
-        String newStr = str.split("\\{")[1];
-        if (newStr.charAt(1) == '\t') {
+        String newStr = "";
+        String newStr2 = "";
+        if (str.contains("{")) {
+            newStr = str.split("\\{")[1];
+            newStr2 = str.split("\\{")[0];
+        }
+
+        //Evaluate first indent style and add settings
+        if (newStr.length() > 1 && newStr.charAt(1) == '\t') {
             options.add("2ForceTab");
         } else {
             options.add("2Spaces");
         }
 
         //Evaluate first bracket style and add setting
-        newStr = str.split("\\{")[0];
-        if (newStr.contains("\n")){
+        if (newStr2.contains("\n")){
             options.add("3Allman");
         } else {
             options.add("3Java");
