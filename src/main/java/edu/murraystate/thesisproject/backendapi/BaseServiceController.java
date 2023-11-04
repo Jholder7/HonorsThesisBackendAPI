@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +54,11 @@ public class BaseServiceController {
         Formatter formatter = new Formatter(tempFile);
         //formatter.getOptionsHandler().setBraceStyleOption(BraceStyleOptions.ALLMAN);
 
-        formatter.getOptionsHandler().applyOptionList(inputFile.settings());
+        if (inputFile.settings()[0].equals("true")) {
+            formatter.getOptionsHandler().applyOptionList(this.EvalDynamicSettings(formatter.getOrigional()));
+        } else {
+            formatter.getOptionsHandler().applyOptionList(inputFile.settings());
+        }
 
         EvaluateDifference eval = new EvaluateDifference(formatter.getOrigional(), formatter.getFormated());
         final SegmentMeta[] segs = eval.getDifferences();
@@ -97,8 +102,33 @@ public class BaseServiceController {
         return new BulkEvalData(requestID, inputFile.fileTitle(), segs.length, etcr, totalCommentCount, segs, literalSegs);
     }
 
-    private String getFileTypeFromName(final String fileName){
+    private String getFileTypeFromName(final String fileName) {
         final String[] fileTitleParts = fileName.split("\\.");
         return fileTitleParts[fileTitleParts.length-1];
+    }
+
+    //Temporary this will be offloaded to it own class when fully implemented
+    // Currently evaluating first occurrence.
+    //TODO: Fix eval on no file or small file causing backend crash
+    private String[] EvalDynamicSettings(String str) {
+        ArrayList<String> options = new ArrayList<>();
+
+        //Evaluate first indent type and add setting
+        String newStr = str.split("\\{")[1];
+        if (newStr.charAt(1) == '\t') {
+            options.add("2ForceTab");
+        } else {
+            options.add("2Spaces");
+        }
+
+        //Evaluate first bracket style and add setting
+        newStr = str.split("\\{")[0];
+        if (newStr.contains("\n")){
+            options.add("3Allman");
+        } else {
+            options.add("3Java");
+        }
+
+        return options.toArray(new String[0]);
     }
 }
