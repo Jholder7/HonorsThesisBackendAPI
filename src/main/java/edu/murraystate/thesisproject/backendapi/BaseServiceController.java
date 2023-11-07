@@ -54,10 +54,12 @@ public class BaseServiceController {
         Formatter formatter = new Formatter(tempFile);
         //formatter.getOptionsHandler().setBraceStyleOption(BraceStyleOptions.ALLMAN);
 
-        if (inputFile.settings()[0].equals("true")) {
-            formatter.getOptionsHandler().applyOptionList(this.EvalDynamicSettings(formatter.getOrigional()));
-        } else {
-            formatter.getOptionsHandler().applyOptionList(inputFile.settings());
+        if (inputFile.settings().length > 0) {
+            if (inputFile.settings()[0].equals("true")) {
+                formatter.getOptionsHandler().applyOptionList(this.EvalDynamicSettings(formatter.getOrigional()));
+            } else {
+                formatter.getOptionsHandler().applyOptionList(inputFile.settings());
+            }
         }
 
         EvaluateDifference eval = new EvaluateDifference(formatter.getOrigional(), formatter.getFormated());
