@@ -130,7 +130,7 @@ public class BaseServiceController {
         }
 
         //Evaluate first bracket style and add setting
-        if (newStr2.contains("\n")){
+        if (newStr2.charAt(newStr2.length()-1) == '\n'){
             options.add("3Allman");
         } else {
             options.add("3Java");
